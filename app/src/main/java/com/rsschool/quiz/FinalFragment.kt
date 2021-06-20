@@ -1,12 +1,8 @@
 package com.rsschool.quiz
 
-import android.R
-import android.animation.ObjectAnimator
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
-import android.util.TypedValue
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -45,8 +41,9 @@ class FinalFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val answers = arguments?.get(ANSWERS_TAG) as MutableList<Int>
-        var result = 0
 
+        // Посчитать результат
+        var result = 0
         for (i in answers.indices) {
             if (Database.questions[i].answerOptions[answers[i] - 1].second)
                 result += 1
@@ -54,6 +51,7 @@ class FinalFragment : Fragment() {
 
         binding.result.text = "Result: $result/${answers.size}"
 
+        // Обработка нажатия кнопки "поделиться" и формирование сообщения
         binding.buttonShare.setOnClickListener {
             var text = "Your result: $result/${answers.size}\n\n"
             for (i in answers.indices) {
@@ -70,11 +68,13 @@ class FinalFragment : Fragment() {
             startActivity(shareIntent)
         }
 
+        // Обработка нажатия кнопки "повторить"
         binding.buttonRepeat.setOnClickListener {
             launcher?.openTheFirstQuestion()
             context?.theme?.applyStyle(Database.questions[0].theme, true)
         }
 
+        // Обработка нажатия системной кнопки '<'
         activity?.onBackPressedDispatcher?.addCallback(object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 launcher?.openTheFirstQuestion()
@@ -82,6 +82,7 @@ class FinalFragment : Fragment() {
             }
         })
 
+        // Обработка нажатия кнопки "закрыть"
         binding.buttonClose.setOnClickListener {
             launcher?.closeApp()
         }

@@ -41,19 +41,18 @@ class QuizFragment : Fragment() {
         launcher = context as Launcher
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    private fun setDataToFragment(questionNumber: Int, answers: MutableList<Int>) {
+        // Установка цвета статус-бара в зависимости от темы
         val typedValue = TypedValue()
         context?.theme?.resolveAttribute(R.attr.colorPrimaryDark, typedValue, true)
         ObjectAnimator.ofArgb(activity?.window, "statusBarColor", activity?.window?.statusBarColor!!, typedValue.data).start()
 
-        val questionNumber = arguments?.getInt(QUESTION_NUMBER_TAG)!!
+        // Отображение вопроса, вариантов ответа и кнопок
         binding.toolbar.title = "Question $questionNumber"
-
         if (questionNumber == 1) {
             binding.toolbar.navigationIcon = null
             binding.previousButton.isEnabled = false
-        } else if (questionNumber == 5) {
+        } else if (questionNumber == Database.questions.size) {
             binding.nextButton.text = "Submit"
         }
 
@@ -64,7 +63,6 @@ class QuizFragment : Fragment() {
         binding.optionFour.text = Database.questions[questionNumber - 1].answerOptions[3].first
         binding.optionFive.text = Database.questions[questionNumber - 1].answerOptions[4].first
 
-        val answers = arguments?.get(ANSWERS_TAG) as MutableList<Int>
         when (answers[questionNumber - 1]) {
             1 -> binding.optionOne.isChecked = true
             2 -> binding.optionTwo.isChecked = true
@@ -73,7 +71,17 @@ class QuizFragment : Fragment() {
             5 -> binding.optionFive.isChecked = true
             else -> binding.nextButton.isEnabled = false
         }
+    }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        val questionNumber = arguments?.getInt(QUESTION_NUMBER_TAG)!!
+        val answers = arguments?.get(ANSWERS_TAG) as MutableList<Int>
+
+        setDataToFragment(questionNumber, answers)
+
+        // Обработка нажатия radioButton
         binding.radioGroup.setOnCheckedChangeListener { _, checkedID ->
             if (checkedID != -1) {
                 binding.nextButton.isEnabled = true
@@ -89,11 +97,14 @@ class QuizFragment : Fragment() {
             }
         }
 
+        // Функция, открывающая предыдущий/следующий фрагмент
         fun openFragment(whichWay: Int) {
             launcher?.openQuizFragment(questionNumber + whichWay, answers)
+            // Установка темы
             context?.theme?.applyStyle(Database.questions[questionNumber - 1 + whichWay].theme, true)
         }
 
+        // Обработка нажатия кнопки "Next"
         binding.nextButton.setOnClickListener {
             if (questionNumber != answers.size) {
                 openFragment(NEXT)
@@ -103,14 +114,17 @@ class QuizFragment : Fragment() {
             }
         }
 
+        // Обработка нажатия кнопки "Previous"
         binding.previousButton.setOnClickListener {
             openFragment(PREVIOUS)
         }
 
+        // Обработка нажатия кнопки '<' на Toolbar'е
         binding.toolbar.setNavigationOnClickListener {
             openFragment(PREVIOUS)
         }
 
+        // Обработка нажатия системной кнопки '<'
         activity?.onBackPressedDispatcher?.addCallback(object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (questionNumber != 1)
@@ -134,11 +148,10 @@ class QuizFragment : Fragment() {
         @JvmStatic
         fun newInstance(questionNumber: Int, answers: MutableList<Int>) =
                 QuizFragment().apply {
-                    arguments =
-                            bundleOf(
-                                    QUESTION_NUMBER_TAG to questionNumber,
-                                    ANSWERS_TAG to answers
-                            )
+                    arguments = bundleOf(
+                            QUESTION_NUMBER_TAG to questionNumber,
+                            ANSWERS_TAG to answers
+                    )
                 }
 
         private const val QUESTION_NUMBER_TAG = "questionNumber"

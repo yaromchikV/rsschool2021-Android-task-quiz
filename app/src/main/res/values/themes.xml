@@ -1,5 +1,5 @@
 <resources>
-    <style name="Theme.Quiz" parent="Theme.MaterialComponents.NoActionBar">
+    <style name="Theme.Quiz" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorOnPrimary">@color/black</item>
         <item name="colorOnSecondary">@color/black</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
