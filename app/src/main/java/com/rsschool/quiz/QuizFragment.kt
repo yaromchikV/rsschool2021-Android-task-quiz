@@ -75,8 +75,18 @@ class QuizFragment : Fragment() {
         }
 
         binding.radioGroup.setOnCheckedChangeListener { _, checkedID ->
-            if (checkedID != -1)
+            if (checkedID != -1) {
                 binding.nextButton.isEnabled = true
+                val radioButtonID = resources.getResourceEntryName(binding.radioGroup.checkedRadioButtonId)
+                answers[questionNumber - 1] = when (radioButtonID) {
+                    "option_one" -> 1
+                    "option_two" -> 2
+                    "option_three" -> 3
+                    "option_four" -> 4
+                    "option_five" -> 5
+                    else -> 0
+                }
+            }
         }
 
         fun openFragment(whichWay: Int) {
@@ -85,15 +95,6 @@ class QuizFragment : Fragment() {
         }
 
         binding.nextButton.setOnClickListener {
-            val radioButtonID = resources.getResourceEntryName(binding.radioGroup.checkedRadioButtonId)
-            answers[questionNumber - 1] = when (radioButtonID) {
-                "option_one" -> 1
-                "option_two" -> 2
-                "option_three" -> 3
-                "option_four" -> 4
-                "option_five" -> 5
-                else -> 0
-            }
             if (questionNumber != answers.size) {
                 openFragment(NEXT)
             } else {
