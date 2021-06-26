@@ -2,6 +2,7 @@ package com.rsschool.quiz
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -17,6 +18,12 @@ class FinalFragment : Fragment() {
 
     private var _binding: FragmentFinalBinding? = null
     private val binding get() = _binding!!
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        // Установка цвета статус-бара
+        activity?.window?.statusBarColor = Color.WHITE
+        super.onCreate(savedInstanceState)
+    }
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -49,6 +56,7 @@ class FinalFragment : Fragment() {
                 result += 1
         }
 
+        // Отображение результата
         binding.result.text = "Result: $result/${answers.size}"
 
         // Обработка нажатия кнопки "поделиться" и формирование сообщения
@@ -71,14 +79,12 @@ class FinalFragment : Fragment() {
         // Обработка нажатия кнопки "повторить"
         binding.buttonRepeat.setOnClickListener {
             launcher?.openTheFirstQuestion()
-            context?.theme?.applyStyle(Database.questions[0].theme, true)
         }
 
         // Обработка нажатия системной кнопки '<'
         activity?.onBackPressedDispatcher?.addCallback(object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 launcher?.openTheFirstQuestion()
-                context?.theme?.applyStyle(Database.questions[0].theme, true)
             }
         })
 

@@ -62,6 +62,5 @@
         app:layout_constraintTop_toBottomOf="@+id/buttonRepeat"
         tools:ignore="MissingConstraints"
         android:contentDescription="@string/todo" />
-
-
+    
 </androidx.constraintlayout.widget.ConstraintLayout>

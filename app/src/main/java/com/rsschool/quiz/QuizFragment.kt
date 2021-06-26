@@ -1,9 +1,7 @@
 package com.rsschool.quiz
 
 import android.R
-import android.animation.ObjectAnimator
 import android.content.Context
-import android.graphics.Color
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
@@ -21,6 +19,16 @@ class QuizFragment : Fragment() {
 
     private var _binding: FragmentQuizBinding? = null
     private val binding get() = _binding!!
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        // Установка темы
+        val questionNumber = arguments?.getInt(QUESTION_NUMBER_TAG)!!
+        val typedValue = TypedValue()
+        context?.theme?.applyStyle(Database.questions[questionNumber - 1].theme, true)
+        context?.theme?.resolveAttribute(R.attr.colorPrimaryDark, typedValue, true)
+        activity?.window?.statusBarColor = typedValue.data
+        super.onCreate(savedInstanceState)
+    }
 
     override fun onCreateView(
             inflater: LayoutInflater,
@@ -42,13 +50,11 @@ class QuizFragment : Fragment() {
     }
 
     private fun setDataToFragment(questionNumber: Int, answers: MutableList<Int>) {
-        // Установка цвета статус-бара в зависимости от темы
-        val typedValue = TypedValue()
-        context?.theme?.resolveAttribute(R.attr.colorPrimaryDark, typedValue, true)
-        ObjectAnimator.ofArgb(activity?.window, "statusBarColor", activity?.window?.statusBarColor!!, typedValue.data).start()
-
-        // Отображение вопроса, вариантов ответа и кнопок
+        // Отображение текста на toolbar'е
         binding.toolbar.title = "Question $questionNumber"
+
+        // Если первый вопрос, отключить кнопку '<' на toolbar'е и кнопку "Previous"
+        // Если последний - переименовать кнопку "Next" в "Submit"
         if (questionNumber == 1) {
             binding.toolbar.navigationIcon = null
             binding.previousButton.isEnabled = false
@@ -56,6 +62,7 @@ class QuizFragment : Fragment() {
             binding.nextButton.text = "Submit"
         }
 
+        // Отображение вопроса и вариантов ответа
         binding.question.text = Database.questions[questionNumber - 1].question
         binding.optionOne.text = Database.questions[questionNumber - 1].answerOptions[0].first
         binding.optionTwo.text = Database.questions[questionNumber - 1].answerOptions[1].first
@@ -63,6 +70,7 @@ class QuizFragment : Fragment() {
         binding.optionFour.text = Database.questions[questionNumber - 1].answerOptions[3].first
         binding.optionFive.text = Database.questions[questionNumber - 1].answerOptions[4].first
 
+        // Отображение выбранного ранее варианта ответа (если не выбран, отключается кнопка "Next")
         when (answers[questionNumber - 1]) {
             1 -> binding.optionOne.isChecked = true
             2 -> binding.optionTwo.isChecked = true
@@ -100,8 +108,6 @@ class QuizFragment : Fragment() {
         // Функция, открывающая предыдущий/следующий фрагмент
         fun openFragment(whichWay: Int) {
             launcher?.openQuizFragment(questionNumber + whichWay, answers)
-            // Установка темы
-            context?.theme?.applyStyle(Database.questions[questionNumber - 1 + whichWay].theme, true)
         }
 
         // Обработка нажатия кнопки "Next"
@@ -110,7 +116,6 @@ class QuizFragment : Fragment() {
                 openFragment(NEXT)
             } else {
                 launcher?.openFinalFragment(answers)
-                ObjectAnimator.ofArgb(activity?.window, "statusBarColor", activity?.window?.statusBarColor!!, Color.WHITE).start()
             }
         }
 
@@ -119,7 +124,7 @@ class QuizFragment : Fragment() {
             openFragment(PREVIOUS)
         }
 
-        // Обработка нажатия кнопки '<' на Toolbar'е
+        // Обработка нажатия кнопки '<' на toolbar'е
         binding.toolbar.setNavigationOnClickListener {
             openFragment(PREVIOUS)
         }
@@ -140,8 +145,6 @@ class QuizFragment : Fragment() {
         })
     }
 
-    private val PREVIOUS = -1
-    private val NEXT = 1
     private var backPressed: Long = 0
 
     companion object {
@@ -156,5 +159,8 @@ class QuizFragment : Fragment() {
 
         private const val QUESTION_NUMBER_TAG = "questionNumber"
         private const val ANSWERS_TAG = "answers"
+
+        private const val PREVIOUS = -1
+        private const val NEXT = 1
     }
 }
